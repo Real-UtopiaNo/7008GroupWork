@@ -9,8 +9,7 @@ from nltk.tokenize import word_tokenize
 class Chatbot:
     def __init__(self):
         # init nltk
-        nltk.data.path.append('D:/vscode/code/STAT7008B/Group_work')
-        nltk.download('punkt') 
+        nltk.data.path.append('nltk_data')
         # init database
         self.lists_of_data = ["aitools","futuretools"] #topics here, then cat the path of csv files
         self.database = self.load_database(self.lists_of_data) #return dict: database[data_type] = [(question, answer),...]
@@ -46,7 +45,7 @@ class Chatbot:
         database = {}
         database_ai = [] # QA for AI
         for list_of_data in lists_of_data:
-            path = "D:\\vscode\\code\\STAT7008B\\Group_work\\Database\\" + list_of_data + ".csv"
+            path = "Database\\" + list_of_data + ".csv"
             data = pd.read_csv(path)
             for i in range(len(data)):
                 database_ai.append(("what is "+data["tool"][i],  data["tool"][i] + ": " + str(data["tool_description"][i]) + "; \nYou can find more information about this tool at " + str(data["tool_mage_url"][i])))
