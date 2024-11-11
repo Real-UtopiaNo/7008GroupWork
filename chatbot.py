@@ -14,6 +14,7 @@ class Chatbot:
 
         # init database
         self.lists_of_data = os.listdir("Database")  # ["ai", "vr", ....]
+        print(self.lists_of_data)
         self.database = self.load_database(self.lists_of_data) #return dict: database[data_type] = [(question1, answer1),...]
 
         # init classifier (train with all data)
@@ -22,11 +23,13 @@ class Chatbot:
         # init for TF-IDF method
         # construct TF-IDF vector for each data type
         self.corpus = {}
-        self.vectorizer = TfidfVectorizer(stop_words = "english")
+        self.vectorizer = {}
         self.tfidf_matrix = {}
-        for data_type in self.database.keys():
+        for data_type in self.database:
+            vectorizer = TfidfVectorizer(stop_words = "english")
             self.corpus[data_type] = [pair[0] for pair in self.database[data_type]]  # 只用问题作为语料
-            self.tfidf_matrix[data_type] = self.vectorizer.fit_transform(self.corpus[data_type])
+            self.tfidf_matrix[data_type] = vectorizer.fit_transform(self.corpus[data_type])
+            self.vectorizer[data_type] = vectorizer
         
         # init for deep learning method
         # 
@@ -47,6 +50,7 @@ class Chatbot:
     def load_database(self,lists_of_data):
         database = {}  # 存储所有数据的QA对
         for type in lists_of_data:
+            print("Loading data type: ",type)
             database_type = [] # QA for certain type
             path = "Database\\" + type
             csvfiles = os.listdir(path)
@@ -54,12 +58,13 @@ class Chatbot:
                 data = pd.read_csv(path + "\\" + csvfile)
                 for i in range(len(data)):
                     database_type.append((data["Question"][i], data["Answer"][i]))
-        database[type] = database_type
+            database[type] = database_type
         return database
 
     def train_classifier(self,database):
         classifier_training_set = []  # 遍历整个数据库，[(question, data_type),...]
-        for data_type in database.keys():
+        for data_type in database:
+            print("Training for data type: ",data_type)
             for pair in database[data_type]:
                 classifier_training_set.append((self.extract_features(pair[0]), data_type))
         classifier = nltk.NaiveBayesClassifier.train(classifier_training_set)
@@ -78,9 +83,9 @@ class Chatbot:
         return self.classifier.classify(features)
         
 
-    def tfidf_retrieve_answer(self,question, data_base, tfidf_matrix):
-        question_tfidf = self.vectorizer.transform([question])
-        cosine_similarities = cosine_similarity(question_tfidf, tfidf_matrix).flatten()
+    def tfidf_retrieve_answer(self,question, question_type, data_base, tfidf_matrix):
+        question_tfidf = self.vectorizer[question_type].transform([question])
+        cosine_similarities = cosine_similarity(tfidf_matrix, question_tfidf).flatten()
         best_match_index = cosine_similarities.argmax()
 
         return data_base[best_match_index][1]
@@ -94,7 +99,7 @@ class Chatbot:
         question_type = self.Beyesian_classifier(question)
         print(question_type)
         if self.bot_mode == "tfidf":
-            answer = self.tfidf_retrieve_answer(question, self.database[question_type], self.tfidf_matrix[question_type])
+            answer = self.tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type])
         elif self.bot_mode == "deep learning":
             pass
         send = "Bot -> " + answer
