@@ -1,14 +1,11 @@
 from tkinter import *
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import nltk
-from nltk.corpus import movie_reviews
-from nltk.tokenize import word_tokenize
 import os
 
 # custom lib
 from train_classifier import *
+from machinel_chatbot import *
 
 class Chatbot:
     def __init__(self):
@@ -20,24 +17,21 @@ class Chatbot:
         print(self.lists_of_data)
         self.database = self.load_database(self.lists_of_data) #return dict: database[data_type] = [(question1, answer1),...]
 
-        
         """
-        in: database, Dict
-        out: classifier, NaiveBayesClassifier
+        in: database
+        out: classifier
         # init classifier (train with all data)
         """
         self.classifier = train_classifier(self.database)
         
+        
+        """
+        in: database
+        out: tfidf_matrix, vectorizer
         # init for TF-IDF method
         # construct TF-IDF vector for each data type
-        self.corpus = {}
-        self.vectorizer = {}
-        self.tfidf_matrix = {}
-        for data_type in self.database:
-            vectorizer = TfidfVectorizer(stop_words = "english")
-            self.corpus[data_type] = [pair[0] for pair in self.database[data_type]]  # 只用问题作为语料
-            self.tfidf_matrix[data_type] = vectorizer.fit_transform(self.corpus[data_type])
-            self.vectorizer[data_type] = vectorizer
+        """
+        self.tfidf_matrix, self.vectorizers = tfidf_init(self.database)
         
         # init for deep learning method
         # 
@@ -74,16 +68,6 @@ class Chatbot:
         self.send = Button(self.root, text="Send", command=self.send).grid(row=1, column=1)
         self.root.mainloop()
 
-        
-
-    def tfidf_retrieve_answer(self,question, question_type, data_base, tfidf_matrix):
-        question_tfidf = self.vectorizer[question_type].transform([question])
-        cosine_similarities = cosine_similarity(tfidf_matrix, question_tfidf).flatten()
-        best_match_index = cosine_similarities.argmax()
-
-        return data_base[best_match_index][1]
-
-
     def send(self):
     # get user input
         question = self.e.get()
@@ -92,7 +76,7 @@ class Chatbot:
         question_type = Beyesian_classifier(self.classifier, question)
         print(question_type)
         if self.bot_mode == "tfidf":
-            answer = self.tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type])
+            answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
         elif self.bot_mode == "deep learning":
             pass
         send = "Bot -> " + answer
