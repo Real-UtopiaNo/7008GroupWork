@@ -5,14 +5,17 @@ from sklearn.metrics.pairwise import cosine_similarity
 import nltk
 from nltk.corpus import movie_reviews
 from nltk.tokenize import word_tokenize
+import os
 
 class Chatbot:
     def __init__(self):
         # init nltk
         nltk.data.path.append('nltk_data')
+
         # init database
-        self.lists_of_data = ["aitools","futuretools"] #topics here, then cat the path of csv files
-        self.database = self.load_database(self.lists_of_data) #return dict: database[data_type] = [(question, answer),...]
+        self.lists_of_data = os.listdir("Database")  # ["ai", "vr", ....]
+        self.database = self.load_database(self.lists_of_data) #return dict: database[data_type] = [(question1, answer1),...]
+
         # init classifier (train with all data)
         self.classifier = self.train_classifier(self.database) #return bayesian classifier
         
@@ -42,15 +45,16 @@ class Chatbot:
         self.e.grid(row=1, column=0)
 
     def load_database(self,lists_of_data):
-        database = {}
-        database_ai = [] # QA for AI
-        for list_of_data in lists_of_data:
-            path = "Database\\" + list_of_data + ".csv"
-            data = pd.read_csv(path)
-            for i in range(len(data)):
-                database_ai.append(("what is "+data["tool"][i],  data["tool"][i] + ": " + str(data["tool_description"][i]) + "; \nYou can find more information about this tool at " + str(data["tool_mage_url"][i])))
-                # database_ai.append((data["tool"][i],  data["tool"][i] + ": " + str(data["tool_description"][i]) + "; \nYou can find more information about this tool at " + str(data["tool_mage_url"][i])))
-        database["ai"] = database_ai
+        database = {}  # 存储所有数据的QA对
+        for type in lists_of_data:
+            database_type = [] # QA for certain type
+            path = "Database\\" + type
+            csvfiles = os.listdir(path)
+            for csvfile in csvfiles:
+                data = pd.read_csv(path + "\\" + csvfile)
+                for i in range(len(data)):
+                    database_type.append((data["Question"][i], data["Answer"][i]))
+        database[type] = database_type
         return database
 
     def train_classifier(self,database):
