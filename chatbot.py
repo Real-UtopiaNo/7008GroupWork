@@ -7,6 +7,9 @@ from nltk.corpus import movie_reviews
 from nltk.tokenize import word_tokenize
 import os
 
+# custom lib
+from train_classifier import *
+
 class Chatbot:
     def __init__(self):
         # init nltk
@@ -17,8 +20,13 @@ class Chatbot:
         print(self.lists_of_data)
         self.database = self.load_database(self.lists_of_data) #return dict: database[data_type] = [(question1, answer1),...]
 
+        
+        """
+        in: database, Dict
+        out: classifier, NaiveBayesClassifier
         # init classifier (train with all data)
-        self.classifier = self.train_classifier(self.database) #return bayesian classifier
+        """
+        self.classifier = train_classifier(self.database)
         
         # init for TF-IDF method
         # construct TF-IDF vector for each data type
@@ -61,26 +69,11 @@ class Chatbot:
             database[type] = database_type
         return database
 
-    def train_classifier(self,database):
-        classifier_training_set = []  # 遍历整个数据库，[(question, data_type),...]
-        for data_type in database:
-            print("Training for data type: ",data_type)
-            for pair in database[data_type]:
-                classifier_training_set.append((self.extract_features(pair[0]), data_type))
-        classifier = nltk.NaiveBayesClassifier.train(classifier_training_set)
-        return classifier
-
-    def extract_features(self,text):
-        words = word_tokenize(text)
-        return {word.lower(): True for word in words}
 
     def run(self):
         self.send = Button(self.root, text="Send", command=self.send).grid(row=1, column=1)
         self.root.mainloop()
 
-    def Beyesian_classifier(self,question):
-        features = self.extract_features(question)
-        return self.classifier.classify(features)
         
 
     def tfidf_retrieve_answer(self,question, question_type, data_base, tfidf_matrix):
@@ -96,7 +89,7 @@ class Chatbot:
         question = self.e.get()
         send = "You -> "+question
         self.txt.insert(END, send + "\n")
-        question_type = self.Beyesian_classifier(question)
+        question_type = Beyesian_classifier(self.classifier, question)
         print(question_type)
         if self.bot_mode == "tfidf":
             answer = self.tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type])
