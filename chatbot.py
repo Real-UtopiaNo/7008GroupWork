@@ -6,6 +6,7 @@ import os
 # custom lib
 from train_classifier import *
 from machinel_chatbot import *
+from deepl_chatbot import *
 
 class Chatbot:
     def __init__(self):
@@ -34,12 +35,11 @@ class Chatbot:
         self.tfidf_matrix, self.vectorizers = tfidf_init(self.database)
         
         # init for deep learning method
-        # 
-        # 
-        # 
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self.bert_model = DualEncoderModel()
 
         #init bot 
-        self.bot_mode = "tfidf"
+        self.bot_mode = "tfidf" # "tfidf" or "dl"
 
         # init UI
         self.root = Tk()
@@ -77,8 +77,8 @@ class Chatbot:
         print(question_type)
         if self.bot_mode == "tfidf":
             answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
-        elif self.bot_mode == "deep learning":
-            pass
+        elif self.bot_mode == "dl":
+            answer = bert_retrieve_answer(question, question_type, self.database, self.tokenizer, self.bert_model)
         send = "Bot -> " + answer
         self.txt.insert(END, send + "\n")
         self.e.delete(0, END)
