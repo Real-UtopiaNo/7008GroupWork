@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 from torch.utils.data import random_split
 from torch.optim import Adam
 from torch.utils.data import DataLoader
+import torch.nn as nn
 # FacebookAI/roberta-base   
 lists_of_data = os.listdir("Database")  # ["ai", "vr", ....]
 database = []  # 存储所有数据的QA对
@@ -19,7 +20,7 @@ for type in lists_of_data:
         data = pd.read_csv(path + "/" + csvfile)
         # data = data.dropna()
         for i in range(len(data)):
-            database.append((data["Question"][i], type))
+            database.append((data["Question"][i].lower(), type))
             count[type] += 1
 print(count)
 
@@ -69,6 +70,14 @@ model = AutoModelForSequenceClassification.from_pretrained("FacebookAI/roberta-b
 if torch.cuda.is_available():
     model = model.cuda()
 optimizer = Adam(model.parameters(), lr=1e-4)
+class_counts = torch.tensor([i for i in count.values()])  # 每个类别的样本数
+
+weights = 1.0 / class_counts.float()  # 权重与样本数成反比
+weights = weights / weights.sum()  # 归一化
+if torch.cuda.is_available():
+    weights = weights.to("cuda")
+print(weights)
+criterion = nn.CrossEntropyLoss(weight=weights)
 
 def evaluate():
     model.eval()
@@ -82,7 +91,7 @@ def evaluate():
             acc_num += (pred.long() == batch["labels"].long()).float().sum()
     return acc_num / len(dataset)
 
-def train(epoch=2, log_step=100):
+def train(epoch=5, log_step=100):
     global_step = 0
     for ep in range(epoch):
         model.train()
@@ -91,10 +100,14 @@ def train(epoch=2, log_step=100):
                 batch = {k: v.cuda() for k, v in batch.items()}
             optimizer.zero_grad()
             output = model(**batch)
-            output.loss.backward()
+            labels = batch["labels"]
+            logits = output.logits
+            loss = criterion(logits, labels)
+            loss.backward()
+            # output.loss.backward()
             optimizer.step()
             if global_step % log_step == 0:
-                print(f"ep: {ep}, global_step: {global_step}, loss: {output.loss.item()}")
+                print(f"ep: {ep}, global_step: {global_step}, loss: {loss.item()}")
             global_step += 1
     acc = evaluate()
     print(f"ep: {epoch}, acc: {acc}")
@@ -102,4 +115,6 @@ def train(epoch=2, log_step=100):
 train()
 model.save_pretrained("finetune_roberta")
 tokenizer.save_pretrained("finetune_roberta")
+
+
 

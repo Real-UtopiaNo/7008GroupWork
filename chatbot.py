@@ -4,7 +4,8 @@ import nltk
 import os
 
 # custom lib
-from train_classifier import *
+from Bayesian_clf import *
+from Roberta_clf import *
 from machinel_chatbot import *
 
 class Chatbot:
@@ -28,8 +29,7 @@ class Chatbot:
         """
         if self.bot_classifier == "Bayesian":
             self.classifier = train_classifier(self.database)
-        elif self.bot_classifier == "Roberta":
-            pass
+
         """
         in: database
         out: tfidf_matrix, vectorizer
@@ -76,7 +76,10 @@ class Chatbot:
         question = self.e.get()
         send = "You -> "+question
         self.txt.insert(END, send + "\n")
-        question_type = Beyesian_classifier(self.classifier, question)
+        if self.bot_classifier == "Bayesian":
+            question_type = Beyesian_classifier(self.classifier, question)
+        elif self.bot_classifier == "Roberta":
+            question_type = Roberta_classifier(question)
         print(question_type)
         if self.bot_mode == "tfidf":
             answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
