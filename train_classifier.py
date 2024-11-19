@@ -1,19 +1,27 @@
 from nltk.tokenize import word_tokenize
-import nltk
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import make_pipeline
 
 def extract_features(text):
     words = word_tokenize(text)
     return {word.lower(): True for word in words}
 
 def train_classifier(database):
-    classifier_training_set = []  # 遍历整个数据库，[(question, data_type),...]
+    texts = []
+    labels = []
     for data_type in database:
-        print("Training for data type: ",data_type)
+        print("Training for data type: ", data_type)
         for pair in database[data_type]:
-            classifier_training_set.append((extract_features(pair[0]), data_type))
-    classifier = nltk.NaiveBayesClassifier.train(classifier_training_set)
-    return classifier
+            texts.append(pair[0])
+            labels.append(data_type)
+    
+    vectorizer = TfidfVectorizer(tokenizer=word_tokenize, stop_words='english')
+    classifier = RandomForestClassifier(n_estimators=200, max_depth=20,random_state=42)
+    model = make_pipeline(vectorizer, classifier)
+    
+    model.fit(texts, labels)
+    return model
 
-def Beyesian_classifier(classifier, question):
-    features = extract_features(question)
-    return classifier.classify(features)
+def Beyesian_classifier(model, question):
+    return model.predict([question])[0]
