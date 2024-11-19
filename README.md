@@ -8,9 +8,9 @@ pip install scikit-learn
 pip install nltk  
 pip install transformers
 
-If you have GPU:
-pip install torch==2.0.1 --index-url https://download.pytorch.org/whl/cu118
-Else:
-pip install torch
+If you have GPU:  
+pip install torch==2.0.1 --index-url https://download.pytorch.org/whl/cu118  
+Else:  
+pip install torch  
 
 python chatbot.py  
