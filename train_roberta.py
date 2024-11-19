@@ -31,9 +31,8 @@ class MyDataset(Dataset):
         self.data = data
         self.label2id = {}
         self.id2label = {}
-        for i, type in enumerate(lists_of_data):
-            self.label2id[type] = i
-            self.id2label[i] = type
+        self.label2id = {'digit': 0, 'edtech': 1, 'proptech': 2, 'ai': 3, 'vr': 4, 'artech': 5}
+        self.id2label = {0: 'digit', 1: 'edtech', 2: 'proptech', 3: 'ai', 4: 'vr', 5: 'artech'}
 
     def __getitem__(self, index):
         return self.data[index][0], self.label2id[self.data[index][1]]
@@ -70,14 +69,14 @@ model = AutoModelForSequenceClassification.from_pretrained("FacebookAI/roberta-b
 if torch.cuda.is_available():
     model = model.cuda()
 optimizer = Adam(model.parameters(), lr=1e-4)
-class_counts = torch.tensor([i for i in count.values()])  # 每个类别的样本数
+# class_counts = torch.tensor([i for i in count.values()])  # 每个类别的样本数
 
-weights = 1.0 / class_counts.float()  # 权重与样本数成反比
-weights = weights / weights.sum()  # 归一化
-if torch.cuda.is_available():
-    weights = weights.to("cuda")
-print(weights)
-criterion = nn.CrossEntropyLoss(weight=weights)
+# weights = 1.0 / class_counts.float()  # 权重与样本数成反比
+# weights = weights / weights.sum()  # 归一化
+# if torch.cuda.is_available():
+#     weights = weights.to("cuda")
+# print(weights)
+# criterion = nn.CrossEntropyLoss(weight=weights)
 
 def evaluate():
     model.eval()
@@ -100,21 +99,21 @@ def train(epoch=5, log_step=100):
                 batch = {k: v.cuda() for k, v in batch.items()}
             optimizer.zero_grad()
             output = model(**batch)
-            labels = batch["labels"]
-            logits = output.logits
-            loss = criterion(logits, labels)
-            loss.backward()
+            # labels = batch["labels"]
+            # logits = output.logits
+            # loss = criterion(logits, labels)
+            output.loss.backward()
             # output.loss.backward()
             optimizer.step()
             if global_step % log_step == 0:
-                print(f"ep: {ep}, global_step: {global_step}, loss: {loss.item()}")
+                print(f"ep: {ep}, global_step: {global_step}, loss: {output.loss.item()}")
             global_step += 1
     acc = evaluate()
     print(f"ep: {epoch}, acc: {acc}")
 
 train()
-model.save_pretrained("finetune_roberta")
-tokenizer.save_pretrained("finetune_roberta")
+model.save_pretrained("finetune_roberta_un")
+tokenizer.save_pretrained("finetune_roberta_un")
 
 
 

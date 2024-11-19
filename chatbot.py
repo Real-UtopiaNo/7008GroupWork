@@ -15,7 +15,7 @@ class Chatbot:
 
         #init bot 
         self.bot_mode = "tfidf"
-        self.bot_classifier = "Bayesian"
+        self.bot_classifier = "Roberta"
 
         # init database
         self.lists_of_data = os.listdir("Database")  # ["ai", "vr", ....]

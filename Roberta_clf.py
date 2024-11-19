@@ -1,8 +1,8 @@
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 
-tokenizer = AutoTokenizer.from_pretrained("finetune_roberta")
-model = AutoModelForSequenceClassification.from_pretrained("finetune_roberta", num_labels=6)
+tokenizer = AutoTokenizer.from_pretrained("finetune_roberta_un")
+model = AutoModelForSequenceClassification.from_pretrained("finetune_roberta_un", num_labels=6)
 label2id = {'digit': 0, 'edtech': 1, 'proptech': 2, 'ai': 3, 'vr': 4, 'artech': 5}
 id2label = {0: 'digit', 1: 'edtech', 2: 'proptech', 3: 'ai', 4: 'vr', 5: 'artech'}
 
