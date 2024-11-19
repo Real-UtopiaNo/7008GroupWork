@@ -12,6 +12,10 @@ class Chatbot:
         # init nltk
         nltk.data.path.append('nltk_data')
 
+        #init bot 
+        self.bot_mode = "tfidf"
+        self.bot_classifier = "Bayesian"
+
         # init database
         self.lists_of_data = os.listdir("Database")  # ["ai", "vr", ....]
         print(self.lists_of_data)
@@ -22,9 +26,10 @@ class Chatbot:
         out: classifier
         # init classifier (train with all data)
         """
-        self.classifier = train_classifier(self.database)
-        
-        
+        if self.bot_classifier == "Bayesian":
+            self.classifier = train_classifier(self.database)
+        elif self.bot_classifier == "Roberta":
+            pass
         """
         in: database
         out: tfidf_matrix, vectorizer
@@ -38,8 +43,6 @@ class Chatbot:
         # 
         # 
 
-        #init bot 
-        self.bot_mode = "tfidf"
 
         # init UI
         self.root = Tk()
