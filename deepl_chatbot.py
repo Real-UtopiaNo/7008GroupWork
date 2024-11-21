@@ -1,42 +1,45 @@
-from transformers import BertTokenizer, BertModel
 import torch
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+from transformers import RobertaModel, RobertaTokenizer
 
-# 加载 BERT 模型和分词器
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertModel.from_pretrained('bert-base-uncased')
+class DualEncoderModel(torch.nn.Module):
+    def __init__(self):
+        super(DualEncoderModel, self).__init__()
+        self.question_encoder = RobertaModel.from_pretrained('roberta-base')
+        self.answer_encoder = RobertaModel.from_pretrained('roberta-base')
 
-# 准备问题-答案对
-knowledge_base = [
-    ("What is AI?", "Artificial Intelligence (AI) refers to the simulation of human intelligence in machines."),
-    ("What is VR?", "Virtual Reality (VR) is a simulated experience that can be similar to or different from the real world."),
-    ("What is blockchain?", "Blockchain is a decentralized digital ledger that records transactions across many computers.")
-]
+    def forward(self, question_inputs, answer_inputs):
+        question_outputs = self.question_encoder(**question_inputs)
+        answer_outputs = self.answer_encoder(**answer_inputs)
+        return question_outputs, answer_outputs
 
-# 将句子转换为 BERT 向量
-def sentence_to_bert_vector(sentence):
-    inputs = tokenizer(sentence, return_tensors='pt', truncation=True, padding=True, max_length=128)
-    outputs = model(**inputs)
-    # 取 [CLS] 标记的向量表示
-    return outputs.last_hidden_state.mean(dim=1).detach().numpy()
+def preprocess_database(database, tokenizer):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    preprocessed_database = {}
+    for question_type, _ in database.items():
+        preprocessed_database[question_type] = []
+        for (q, _) in database[question_type]:
+            answer_inputs = tokenizer(q, return_tensors='pt', padding=True, truncation=True).to(device)
+            preprocessed_database[question_type].append(answer_inputs)
+    return preprocessed_database
 
-# 构建知识库中每个问题的 BERT 向量
-knowledge_base_vectors = [sentence_to_bert_vector(pair[0]) for pair in knowledge_base]
+def bert_retrieve_answer(question, question_type, preprocessed_database, tokenizer, model):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    model.eval()
 
-# 检索答案
-def retrieve_answer(question, knowledge_base, knowledge_base_vectors):
-    question_vector = sentence_to_bert_vector(question)
-    # 计算语义相似度
-    cosine_similarities = np.array([cosine_similarity(question_vector, knowledge_base_vector).flatten() for knowledge_base_vector in knowledge_base_vectors])
-    
-    # 找到最相似的问题
-    best_match_index = cosine_similarities.argmax()
-    
-    # 返回对应的答案
-    return knowledge_base[best_match_index][1]
+    best_match_index = -1
+    best_score = float('-inf')
 
-# 测试
-user_question = "I want to know about AI tools."
-answer = retrieve_answer(user_question, knowledge_base, knowledge_base_vectors)
-print(answer)
+    question_inputs = tokenizer(question, return_tensors='pt', padding=True, truncation=True).to(device)
+
+    for idx, answer_inputs_db in enumerate(preprocessed_database[question_type]):
+        with torch.no_grad():
+            question_outputs, answer_outputs = model(question_inputs, answer_inputs_db)
+            score = torch.cosine_similarity(question_outputs.last_hidden_state.mean(dim=1),
+                                            answer_outputs.last_hidden_state.mean(dim=1)).item()
+
+        if score > best_score:
+            best_score = score
+            best_match_index = idx
+
+    return best_match_index, best_score

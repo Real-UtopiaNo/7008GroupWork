@@ -8,6 +8,7 @@ from Bayesian_clf import *
 from Roberta_clf import *
 from Randomforest_clf import *
 from machinel_chatbot import *
+from deepl_chatbot import *
 
 class Chatbot:
     def __init__(self):
@@ -15,7 +16,7 @@ class Chatbot:
         nltk.data.path.append('nltk_data')
 
         #init bot 
-        self.bot_mode = "tfidf"
+        self.bot_mode = "dl"
         self.bot_classifier = "Roberta"
 
         # init database
@@ -23,28 +24,25 @@ class Chatbot:
         print(self.lists_of_data)
         self.database = self.load_database(self.lists_of_data) #return dict: database[data_type] = [(question1, answer1),...]
 
-        """
-        in: database
-        out: classifier
+
         # init classifier (train with all data)
-        """
         if self.bot_classifier == "Bayesian":
             self.classifier = train_bys_classifier(self.database)
         elif self.bot_classifier == "RandomForest":
             self.rfmodel = train_tf_classifier(self.database)
+        elif self.bot_classifier == "Roberta":
+            self.roberta_tokenizer, self.roberta_model = init_roberta_clf()
 
-        """
-        in: database
-        out: tfidf_matrix, vectorizer
+
         # init for TF-IDF method
-        # construct TF-IDF vector for each data type
-        """
-        self.tfidf_matrix, self.vectorizers = tfidf_init(self.database)
+        if self.bot_mode == "tfidf":
+            self.tfidf_matrix, self.vectorizers = tfidf_init(self.database)
         
         # init for deep learning method
-        # 
-        # 
-        # 
+        if self.bot_mode == "dl":
+            self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+            self.preprocessed_database = preprocess_database(self.database, self.tokenizer)
+            self.bert_model = DualEncoderModel()
 
 
         # init UI
@@ -83,14 +81,15 @@ class Chatbot:
             if self.bot_classifier == "Bayesian":
                 question_type = Beyesian_classifier(self.classifier, question)
             elif self.bot_classifier == "Roberta":
-                question_type = Roberta_classifier(question)
+                question_type = Roberta_classifier(question,self.roberta_tokenizer, self.roberta_model)
             elif self.bot_classifier == "RandomForest":
                 question_type = Randomforest_classifier(self.rfmodel, question)
             print(question_type)
             if self.bot_mode == "tfidf":
                 answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
-            elif self.bot_mode == "deep learning":
-                pass
+            elif self.bot_mode == "dl":
+                best_match_dl, _ = bert_retrieve_answer(question, question_type, self.preprocessed_database, self.tokenizer, self.bert_model)
+                answer = self.database[question_type][best_match_dl][1]
             send = "Bot -> " + answer
             self.txt.insert(END, send + "\n")
             self.e.delete(0, END)
