@@ -6,6 +6,7 @@ import os
 # custom lib
 from Bayesian_clf import *
 from Roberta_clf import *
+from Randomforest_clf import *
 from machinel_chatbot import *
 
 class Chatbot:
@@ -28,7 +29,9 @@ class Chatbot:
         # init classifier (train with all data)
         """
         if self.bot_classifier == "Bayesian":
-            self.classifier = train_classifier(self.database)
+            self.classifier = train_bys_classifier(self.database)
+        elif self.bot_classifier == "RandomForest":
+            self.rfmodel = train_tf_classifier(self.database)
 
         """
         in: database
@@ -73,21 +76,34 @@ class Chatbot:
 
     def send(self):
     # get user input
-        question = self.e.get()
-        send = "You -> "+question
-        self.txt.insert(END, send + "\n")
-        if self.bot_classifier == "Bayesian":
-            question_type = Beyesian_classifier(self.classifier, question)
-        elif self.bot_classifier == "Roberta":
-            question_type = Roberta_classifier(question)
-        print(question_type)
-        if self.bot_mode == "tfidf":
-            answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
-        elif self.bot_mode == "deep learning":
-            pass
-        send = "Bot -> " + answer
-        self.txt.insert(END, send + "\n")
-        self.e.delete(0, END)
+        question = self.robustness_input(self.e.get())
+        if question != None:
+            send = "You -> "+question
+            self.txt.insert(END, send + "\n")
+            if self.bot_classifier == "Bayesian":
+                question_type = Beyesian_classifier(self.classifier, question)
+            elif self.bot_classifier == "Roberta":
+                question_type = Roberta_classifier(question)
+            elif self.bot_classifier == "RandomForest":
+                question_type = Randomforest_classifier(self.rfmodel, question)
+            print(question_type)
+            if self.bot_mode == "tfidf":
+                answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
+            elif self.bot_mode == "deep learning":
+                pass
+            send = "Bot -> " + answer
+            self.txt.insert(END, send + "\n")
+            self.e.delete(0, END)
+        else:
+            send = "Bot -> " + "Invalid input!"
+            self.txt.insert(END, send + "\n")
+            self.e.delete(0, END)
+
+    def robustness_input(self, question):
+        if len(question)<=1:
+            return None
+        else:
+            return question
 
 
 

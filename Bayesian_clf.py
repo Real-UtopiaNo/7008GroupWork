@@ -5,7 +5,7 @@ def extract_features(text):
     words = word_tokenize(text)
     return {word.lower(): True for word in words}
 
-def train_classifier(database):
+def train_bys_classifier(database):
     classifier_training_set = []  # 遍历整个数据库，[(question, data_type),...]
     for data_type in database:
         print("Training for data type: ",data_type)
