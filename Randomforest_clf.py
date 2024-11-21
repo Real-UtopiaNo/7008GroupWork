@@ -14,7 +14,7 @@ def train_tf_classifier(database):
             labels.append(data_type)
     
     vectorizer = TfidfVectorizer(tokenizer=word_tokenize, stop_words='english')
-    classifier = RandomForestClassifier(n_estimators=200, max_depth=20,random_state=42)
+    classifier = RandomForestClassifier(n_estimators=200, max_depth=40,random_state=42)
     rfmodel = make_pipeline(vectorizer, classifier)
     
     rfmodel.fit(texts, labels)
