@@ -12,5 +12,8 @@ If you have GPU:
 pip install torch==2.0.1 --index-url https://download.pytorch.org/whl/cu118  
 Else:  
 pip install torch  
-
+  
+download model weight and save it at "finetune_roberta_un/"  
+https://drive.google.com/file/d/1f9CdrwgKTSogDXUYZBkG8wMTcrXaAkkz/view?usp=drive_link  
+  
 python chatbot.py  
