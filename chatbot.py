@@ -37,7 +37,7 @@ class Chatbot:
         # init for deep learning method
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
         self.preprocessed_database = preprocess_database(self.database, self.tokenizer)
-        self.bert_model = DualEncoderModel()
+        self.bert_model = QuestionEncoder()
 
         #init bot 
         self.bot_mode = "dl" # "tfidf" or "dl"
@@ -79,7 +79,7 @@ class Chatbot:
         if self.bot_mode == "tfidf":
             answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
         elif self.bot_mode == "dl":
-            best_match_dl, _ = bert_retrieve_answer(question, question_type, self.preprocessed_database, self.tokenizer, self.bert_model)
+            best_match_dl, _ = dl_retrieve_question(question, question_type, self.preprocessed_database, self.tokenizer, self.bert_model)
             answer = self.database[question_type][best_match_dl][1]
         send = "Bot -> " + answer
         self.txt.insert(END, send + "\n")
