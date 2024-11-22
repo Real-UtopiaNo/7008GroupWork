@@ -24,7 +24,7 @@ def preprocess_database(database, tokenizer, cache_dir="./cache"):
     os.makedirs(cache_dir, exist_ok=True)
     
     database_hash = generate_database_hash(database)
-    cache_file = os.path.join(cache_dir, f"encoded_questions_{database_hash}.pt")
+    cache_file = os.path.join(cache_dir, f"encoded_questions.pt")
     
     if os.path.exists(cache_file):
         print("loading existing cache file...")
