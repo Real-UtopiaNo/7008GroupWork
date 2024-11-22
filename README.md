@@ -21,7 +21,7 @@ https://drive.google.com/file/d/1f9CdrwgKTSogDXUYZBkG8wMTcrXaAkkz/view?usp=drive
 python chatbot.py  
 
 # Code Structure  
-7008GroupWork
+7008GroupWork  
 ├─analysis      #store analysis picc  
 ├─cache      #store encoded database for deep learning retrieve method  
 ├─Database      #store processed QA pairs  
