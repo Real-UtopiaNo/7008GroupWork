@@ -22,7 +22,7 @@ python chatbot.py
 
 # Code Structure  
 7008GroupWork  
-├─analysis      #store analysis picc  
+├─analysis      #store analysis pic  
 ├─cache      #store encoded database for deep learning retrieve method  
 ├─Database      #store processed QA pairs  
 ├─finetune_roberta_un      #store finetuned roberta classifier  
