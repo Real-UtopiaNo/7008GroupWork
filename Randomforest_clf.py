@@ -10,7 +10,7 @@ def train_tf_classifier(database):
     for data_type in database:
         print("Training for data type: ", data_type)
         for pair in database[data_type]:
-            texts.append(pair[0])
+            texts.append(pair[0].lower())
             labels.append(data_type)
     
     vectorizer = TfidfVectorizer(tokenizer=word_tokenize, stop_words='english')

@@ -44,7 +44,7 @@ def preprocess_database(database, tokenizer, cache_dir="./cache"):
         
         for (q, _) in qa_pairs:
             with torch.no_grad():
-                q_inputs = tokenizer(q, return_tensors='pt', padding=True, truncation=True).to(device)
+                q_inputs = tokenizer(q.lower(), return_tensors='pt', padding=True, truncation=True).to(device)
                 q_vector = model(q_inputs)
                 encoded_list.append(q_vector)
                 

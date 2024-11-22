@@ -58,10 +58,11 @@ class Chatbot:
         for type in lists_of_data:
             print("Loading data type: ",type)
             database_type = [] # QA for certain type
-            path = "Database\\" + type
+            # path = "Database\\" + type
+            path = os.path.join("Database", type)
             csvfiles = os.listdir(path)
             for csvfile in csvfiles:
-                data = pd.read_csv(path + "\\" + csvfile)
+                data = pd.read_csv(os.path.join(path,csvfile))
                 for i in range(len(data)):
                     database_type.append((data["Question"][i], data["Answer"][i]))
             database[type] = database_type
@@ -74,7 +75,7 @@ class Chatbot:
 
     def send(self):
     # get user input
-        question = self.robustness_input(self.e.get())
+        question = self.robustness_input(self.e.get()).lower()
         if question != None:
             send = "You -> "+question
             self.txt.insert(END, send + "\n")
@@ -88,7 +89,7 @@ class Chatbot:
             if self.bot_mode == "tfidf":
                 answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
             elif self.bot_mode == "dl":
-                best_match_dl, _ = bert_retrieve_answer(question, question_type, self.preprocessed_database, self.tokenizer, self.bert_model)
+                best_match_dl, _ = dl_retrieve_question(question, question_type, self.preprocessed_database, self.tokenizer, self.bert_model)
                 answer = self.database[question_type][best_match_dl][1]
             send = "Bot -> " + answer
             self.txt.insert(END, send + "\n")
