@@ -13,10 +13,23 @@ class QuestionEncoder(torch.nn.Module):
         outputs = self.encoder(**inputs)
         return outputs.last_hidden_state.mean(dim=1)
 
-# judgement of the database
 def generate_database_hash(database):
-    database_str = json.dumps(database, sort_keys=True)
-    return hashlib.md5(database_str.encode()).hexdigest()
+    def normalize_data(obj):
+        if isinstance(obj, dict):
+            return {k: normalize_data(obj[k]) for k in sorted(obj.keys())}
+        elif isinstance(obj, list):
+            return [normalize_data(item) for item in obj]
+        elif isinstance(obj, (int, float)):
+            return str(obj)
+        elif isinstance(obj, str):
+            return obj.replace('\r\n', '\n').replace('\r', '\n')
+        else:
+            return str(obj)
+
+    normalized_data = normalize_data(database)
+    database_str = json.dumps(normalized_data, ensure_ascii=True, sort_keys=True)
+    
+    return hashlib.md5(database_str.encode('utf-8')).hexdigest()
 
 def preprocess_database(database, tokenizer, cache_dir="./cache"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
