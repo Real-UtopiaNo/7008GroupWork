@@ -8,7 +8,8 @@ conda activate 7008gw
 pip install pandas  
 pip install scikit-learn  
 pip install nltk  
-pip install transformers
+pip install transformers  
+pip install matplotlib  
 ## 2.Install torch (CPU version is enough to run the code)   
 ### If you have GPU:  
 pip install torch==2.0.1 --index-url https://download.pytorch.org/whl/cu118  
