@@ -2,6 +2,8 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import os
 import pandas as pd
+import matplotlib
+import matplotlib.pyplot as plt
 tokenizer = AutoTokenizer.from_pretrained("finetune_roberta_un")
 model = AutoModelForSequenceClassification.from_pretrained("finetune_roberta_un")
 
@@ -40,3 +42,20 @@ for i,(sen, type) in enumerate(database):
         print(i/len(database) , "%")
 for type in count.keys():
     print(type , ":" ,correct[type] / count[type])
+
+plt.figure(figsize=(10, 6))
+categories, accuracies = [], []
+overall_accuracy = sum(correct.values())/sum(count.values())
+print("Overall accuracy: ", overall_accuracy)
+for data_type in count:
+    categories.append(data_type)
+    accuracies.append(correct[data_type]/count[data_type])
+plt.bar(categories, accuracies, color='yellowgreen')
+plt.axhline(y=overall_accuracy, color='r', linestyle='--', label='Overall accuracy') 
+plt.ylim(0, 1) 
+plt.title('Bayesian Classifier Accuracies')
+plt.xlabel('Categories')
+plt.ylabel('Accuracy')
+plt.legend()
+os.makedirs('analysis', exist_ok=True)
+plt.savefig('analysis/roberta_acc.png')
