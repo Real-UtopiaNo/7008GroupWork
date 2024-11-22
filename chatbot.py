@@ -42,7 +42,7 @@ class Chatbot:
         if self.bot_mode == "dl":
             self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
             self.preprocessed_database = preprocess_database(self.database, self.tokenizer)
-            self.bert_model = DualEncoderModel()
+            self.bert_model = QuestionEncoder()
 
 
         # init UI
