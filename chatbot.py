@@ -75,9 +75,10 @@ class Chatbot:
 
     def send(self):
     # get user input
-        question = self.robustness_input(self.e.get()).lower()
+        question = self.robustness_input(self.e.get())
         if question != None:
             send = "You -> "+question
+            question = question.lower()
             self.txt.insert(END, send + "\n")
             if self.bot_classifier == "Bayesian":
                 question_type = Beyesian_classifier(self.classifier, question)
