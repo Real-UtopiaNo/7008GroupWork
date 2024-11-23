@@ -40,3 +40,5 @@ python chatbot.py
 ─ test_bayesian.py      #Test the accuracy of bayesian classifier  
 ─ test_roberta.py      #Test the accuracy of roberta classifier  
 ─ test_randomforest.py      #Test the accuracy of random forest classifier  
+─ test_machinel.py      #Test the accuracy of TF-IDF retrieval method  
+─ test_deepl.py      #Test the accuracy of of Roberta retrieval method  
