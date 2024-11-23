@@ -88,7 +88,7 @@ class Chatbot:
                 question_type = Randomforest_classifier(self.rfmodel, question)
             print(question_type)
             if self.bot_mode == "tfidf":
-                answer = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
+                answer, _, _ = tfidf_retrieve_answer(question, question_type,self.database[question_type], self.tfidf_matrix[question_type], self.vectorizers)
             elif self.bot_mode == "dl":
                 best_match_dl, _ = dl_retrieve_question(question, question_type, self.preprocessed_database, self.tokenizer, self.bert_model)
                 answer = self.database[question_type][best_match_dl][1]

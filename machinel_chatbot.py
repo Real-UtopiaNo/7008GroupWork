@@ -15,5 +15,6 @@ def tfidf_retrieve_answer(question, question_type, data_base, tfidf_matrix, vect
     question_tfidf = vectorizer[question_type].transform([question])
     cosine_similarities = cosine_similarity(tfidf_matrix, question_tfidf).flatten()
     best_match_index = cosine_similarities.argmax()
+    max_similarity = cosine_similarities[best_match_index]
 
-    return data_base[best_match_index][1]
+    return data_base[best_match_index][1], best_match_index, max_similarity
