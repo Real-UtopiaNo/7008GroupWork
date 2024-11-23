@@ -1,6 +1,6 @@
 from nltk.tokenize import word_tokenize
 import nltk
-
+nltk.data.path.append('nltk_data')
 def extract_features(text):
     words = word_tokenize(text)
     return {word.lower(): True for word in words}

@@ -1,8 +1,9 @@
+import nltk
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import make_pipeline
-
+nltk.data.path.append('nltk_data')
 
 def train_tf_classifier(database):
     texts = []
