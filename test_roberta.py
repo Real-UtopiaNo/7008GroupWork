@@ -53,7 +53,7 @@ for data_type in count:
 plt.bar(categories, accuracies, color='yellowgreen')
 plt.axhline(y=overall_accuracy, color='r', linestyle='--', label='Overall accuracy') 
 plt.ylim(0, 1) 
-plt.title('Bayesian Classifier Accuracies')
+plt.title('RoBERTa Based Classifier Accuracies')
 plt.xlabel('Categories')
 plt.ylabel('Accuracy')
 plt.legend()
