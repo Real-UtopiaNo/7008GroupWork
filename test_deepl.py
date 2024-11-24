@@ -64,7 +64,7 @@ def test_retrieval_accuracy(encoded_database, tokenizer, model, similarity_thres
             continue
 
         print("\nSample error cases:")
-        for errors in error_retrevial[question_type]:
+        for errors in error_retrevial[question_type][:5]:
             print(f"Input question: {errors[0]}")
             print(f"Retrieved question: {errors[1]}")
             print(f"Similarity: {errors[2]:.10f}")
@@ -81,6 +81,7 @@ def test_retrieval_accuracy(encoded_database, tokenizer, model, similarity_thres
 def plot_accuracy_results(accuracy_results):
     question_types = list(accuracy_results.keys())
     accuracies = list(accuracy_results.values())
+    overall_accuracy = sum(accuracies) / len(accuracies)
 
     plt.figure(figsize=(12, 7))
     
@@ -98,6 +99,8 @@ def plot_accuracy_results(accuracy_results):
                 f'{height:.2f}%',
                 ha='center', va='bottom')
     
+    plt.axhline(y=overall_accuracy, color='red', linestyle='--', linewidth=1.5, label=f'Overall Accuracy: {overall_accuracy:.2f}%')
+    plt.legend()
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
     plt.savefig('analysis/deepl_acc.png')
