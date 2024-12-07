@@ -47,7 +47,7 @@ for data_type in sum_:
 plt.bar(categories, accuracies, color='green')
 plt.axhline(y=overall_accuracy, color='r', linestyle='--', label='Overall accuracy') 
 plt.ylim(0, 1) 
-plt.title('Bayesian Classifier Accuracies')
+plt.title('Rf Classifier Accuracies')
 plt.xlabel('Categories')
 plt.ylabel('Accuracy')
 plt.legend()

@@ -41,14 +41,7 @@ class MyDataset(Dataset):
         return len(self.data)
     
 dataset = MyDataset(database)
-# for i in range(5):
-#     print(dataset[i])
 
-# trainset, validset = random_split(dataset, lengths=[0.999, 0.001])
-# len(trainset), len(validset)
-# for i in range(5):
-#     print(trainset[i])
-#     print(validset[i])
 
 tokenizer = AutoTokenizer.from_pretrained("FacebookAI/roberta-base")
 
@@ -69,14 +62,7 @@ model = AutoModelForSequenceClassification.from_pretrained("FacebookAI/roberta-b
 if torch.cuda.is_available():
     model = model.cuda()
 optimizer = Adam(model.parameters(), lr=1e-4)
-# class_counts = torch.tensor([i for i in count.values()])  # 每个类别的样本数
 
-# weights = 1.0 / class_counts.float()  # 权重与样本数成反比
-# weights = weights / weights.sum()  # 归一化
-# if torch.cuda.is_available():
-#     weights = weights.to("cuda")
-# print(weights)
-# criterion = nn.CrossEntropyLoss(weight=weights)
 
 def evaluate():
     model.eval()
@@ -99,11 +85,9 @@ def train(epoch=5, log_step=100):
                 batch = {k: v.cuda() for k, v in batch.items()}
             optimizer.zero_grad()
             output = model(**batch)
-            # labels = batch["labels"]
-            # logits = output.logits
-            # loss = criterion(logits, labels)
+
             output.loss.backward()
-            # output.loss.backward()
+
             optimizer.step()
             if global_step % log_step == 0:
                 print(f"ep: {ep}, global_step: {global_step}, loss: {output.loss.item()}")
