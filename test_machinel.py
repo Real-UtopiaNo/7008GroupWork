@@ -69,7 +69,7 @@ def test_retrieval_accuracy(database, tfidf_matrix, vectorizers, similarity_thre
             continue
 
         print("\nSample error cases:")
-        for errors in error_retrevial[question_type]:
+        for errors in error_retrevial[question_type][:5]:
             print(f"Input question: {errors[0]}")
             print(f"Retrieved question: {errors[1]}")
             print(f"Similarity: {errors[2]}")
@@ -86,6 +86,8 @@ def test_retrieval_accuracy(database, tfidf_matrix, vectorizers, similarity_thre
 def plot_accuracy_results(accuracy_results):
     question_types = list(accuracy_results.keys())
     accuracies = list(accuracy_results.values())
+    overall_accuracy = sum(accuracies) / len(accuracies)
+
 
     plt.figure(figsize=(12, 7))
     
@@ -94,7 +96,7 @@ def plot_accuracy_results(accuracy_results):
     plt.title('Retrieval Accuracy by Machinel method', fontsize=14)
     plt.xlabel('Question Type', fontsize=12)
     plt.ylabel('Accuracy (%)', fontsize=12)
-    plt.xticks(range(len(question_types)), question_types, rotation=45, ha='right')
+    plt.xticks(range(len(question_types)), question_types)
     plt.ylim(0, max(accuracies) * 1.1)
     
     for bar in bars:
@@ -103,10 +105,12 @@ def plot_accuracy_results(accuracy_results):
                 f'{height:.2f}%',
                 ha='center', va='bottom')
     
+    plt.axhline(y=overall_accuracy, color='red', linestyle='--', linewidth=1.5, label=f'Overall Accuracy: {overall_accuracy:.2f}%')
+    plt.legend()
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
     plt.savefig('analysis/machinel_acc.png')
     plt.show()
 
-accuracy_results = test_retrieval_accuracy(database, tfidf_matrix, vectorizers, 0.98) #这里调整阈值
+accuracy_results = test_retrieval_accuracy(database, tfidf_matrix, vectorizers, 0.99) #这里调整阈值
 plot_accuracy_results(accuracy_results)
