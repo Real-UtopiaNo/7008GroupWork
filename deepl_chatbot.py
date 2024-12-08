@@ -1,8 +1,7 @@
 import torch
 from transformers import RobertaModel, RobertaTokenizer
 import os
-import json
-import hashlib
+
 
 class QuestionEncoder(torch.nn.Module):
     def __init__(self):
@@ -13,17 +12,12 @@ class QuestionEncoder(torch.nn.Module):
         outputs = self.encoder(**inputs)
         return outputs.last_hidden_state.mean(dim=1)
 
-# judgement of the database
-def generate_database_hash(database):
-    database_str = json.dumps(database, sort_keys=True)
-    return hashlib.md5(database_str.encode()).hexdigest()
 
 def preprocess_database(database, tokenizer, cache_dir="./cache"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     os.makedirs(cache_dir, exist_ok=True)
-    
-    database_hash = generate_database_hash(database)
+ 
     cache_file = os.path.join(cache_dir, f"encoded_questions.pt")
     
     if os.path.exists(cache_file):
